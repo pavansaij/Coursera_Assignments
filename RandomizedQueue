@@ -1,0 +1,119 @@
+package assignment2;
+
+import java.util.Iterator;
+
+import edu.princeton.cs.algs4.StdRandom;
+
+public class RandomizedQueue<Item> implements Iterable<Item> {
+	private Item[] items;
+	int size;
+	
+	@SuppressWarnings("unchecked")
+	public RandomizedQueue(){
+		items = (Item[]) new Object[1];
+		size = 0;
+	}
+	
+	public boolean isEmpty(){
+		return (size == 0);	
+	}
+	
+	public int size(){
+		return size;
+	}
+	
+	public void enqueue(Item item){
+		if (item == null){
+			throw new java.lang.NullPointerException();
+		}
+		if (size == items.length){
+			resize(2 * items.length);
+		}
+		
+        items[size++] = item;
+	}
+	
+	 private void resize(int capacity) {
+        @SuppressWarnings("unchecked")
+		Item[] copy = (Item[]) new Object[capacity];
+        for (int i = 0; i < size; i++){ 
+        	copy[i] = items[i];
+        }
+        items = copy;
+	 }
+	
+	 public Item dequeue(){
+	        if (isEmpty()){ 
+	        	throw new java.util.NoSuchElementException();
+	        }
+	        
+	        int index = StdRandom.uniform(size);
+	        Item ans = items[index];
+	        if (index != size - 1) {
+	        	items[index] = items[size - 1];
+	        }
+	        items[--size] = null;
+	        if (size >= 1 && size == items.length / 4){
+	        	resize(items.length / 2);
+	        }
+	        return ans;
+	 }
+	 
+	 public Item sample()
+	    {
+	        if (isEmpty()) throw new java.util.NoSuchElementException();
+	        return items[StdRandom.uniform(size)];
+	    }
+	   
+	 
+	 public Iterator<Item> iterator()
+	    {
+	       return new RandomizedQueueIterator();
+	    }
+	    
+    private class RandomizedQueueIterator implements Iterator<Item> {
+        private int subsize = size;
+        private final Item[] copy;
+        
+		@SuppressWarnings("unchecked")
+		private RandomizedQueueIterator() {
+            copy = (Item[]) new Object[subsize];
+            for (int i = 0; i < subsize; i++){
+            	copy[i] = items[i];
+            }
+        }
+        
+        @Override
+        public boolean hasNext() { 
+        	return subsize > 0; 
+        }
+        
+        @Override
+        public void remove() { 
+            throw new java.lang.UnsupportedOperationException();
+        }
+        
+        @Override
+        public Item next() {
+            if (!hasNext()) throw new java.util.NoSuchElementException();
+            int index = StdRandom.uniform(subsize);
+            Item ans = copy[index];
+            if (index != subsize - 1) copy[index] = copy[subsize - 1];
+            copy[--subsize] = null;
+            return ans;
+        }
+    }
+    
+	public static void main(String[] args) {
+		RandomizedQueue<Integer> rq = new RandomizedQueue<>();
+		rq.enqueue(1);
+		rq.enqueue(5);
+		rq.enqueue(7);
+		rq.enqueue(9);
+		rq.enqueue(4);
+		System.out.println("Size before : "+rq.size);
+		System.out.println("Dequed : " + rq.dequeue());
+		System.out.println("Size after : "+rq.size);
+		System.out.println("Sample Pick : "+rq.sample());
+	}
+}
